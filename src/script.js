@@ -39,12 +39,6 @@ loader.load(
         })
         scene.add( root );
 
-        // gltf.animations; // Array<THREE.AnimationClip>
-        // gltf.scene; // THREE.Group
-        // gltf.scenes; // Array<THREE.Group>
-        // gltf.cameras; // Array<THREE.Camera>
-        // gltf.asset; // Object
-
     },
     // called while loading is progressing
     function ( xhr ) {
@@ -82,11 +76,6 @@ loader.load(
         root.scale.set(scale, scale , scale)
         cloud = root
         scene.add( root );
-        // gltf.animations; // Array<THREE.AnimationClip>
-        // gltf.scene; // THREE.Group
-        // gltf.scenes; // Array<THREE.Group>
-        // gltf.cameras; // Array<THREE.Camera>
-        // gltf.asset; // Object
 
     },
     // called while loading is progressing

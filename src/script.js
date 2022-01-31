@@ -1,17 +1,14 @@
 import './style.css'
 import * as THREE from 'three'
-import {FlyControls} from "three/examples/jsm/controls/FlyControls";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as dat from 'dat.gui'
 
 let cloud
 let cloud2
+let star
+
 //Loading
-
-const textureLoader = new THREE.TextureLoader()
-
-const normalTexture = textureLoader.load('/textures/NormalMap.png')
 
 // Debug
 const gui = new dat.GUI()
@@ -22,7 +19,7 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-// Objects
+// Map
 const loader = new GLTFLoader();
 loader.load(
     // resource URL
@@ -54,7 +51,7 @@ loader.load(
     }
 );
 
-//Nuvens
+//Cloud 1
 loader.load(
     // resource URL
     'scene_cloud.gltf',
@@ -69,7 +66,6 @@ loader.load(
             }
         })
 
-        //console.log(cloud)
         root.position.set(0,6,0)
         const scale = 0.005
         root.rotateY(1.5708)
@@ -91,6 +87,7 @@ loader.load(
 
     }
 );
+//Cloud 2
 loader.load(
     // resource URL
     'scene_cloud.gltf',
@@ -127,30 +124,40 @@ loader.load(
 
     }
 );
-// const geometry = new THREE.SphereGeometry(.5, 64, 64)
-// //Materials
-//
-// const material = new THREE.MeshPhongMaterial()
-//
-// material.color = new THREE.Color(0xff0000)
-//
-// //Mesh
-// const sphere = new THREE.Mesh(geometry,material)
-// sphere.castShadow = true;
-// sphere.receiveShadow = true;
-// scene.add(sphere)
+//Star
+loader.load(
+    // resource URL
+    'star.gltf',
+    // called when the resource is loaded
+    function ( gltf ) {
 
-// Lights
-// const light = new THREE.DirectionalLight(0xfffff, 1)
-// light.position.set(0,12,0)
-// light.casShadow = true
-// scene.add(light)
-// const lightHelper = new THREE.PointLightHelper(light,.1)
-// scene.add(lightHelper)
-// gui.add(light.position, 'x').min(-6).max(6).step(0.01)
-// gui.add(light.position, 'y').min(0).max(24).step(0.01)
-// gui.add(light.position, 'z').min(-3).max(3).step(0.01)
-// gui.add(light, 'intensity').min(0).max(10).step(0.1)
+        const root = gltf.scene
+        root.traverse(function(model) {
+            if(model.isMesh){
+                model.castShadow = true;
+                model.receiveShadow = true;
+            }
+        })
+
+        root.position.set(-0.9,1.6,2.7)
+        star = root
+
+        scene.add( root );
+
+    },
+    // called while loading is progressing
+    function ( xhr ) {
+
+        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+    },
+    // called when loading has errors
+    function ( error ) {
+
+        console.log( 'An error happened' );
+
+    }
+);
 
 const pointLight = new THREE.PointLight(0xffffff, 2)
 pointLight.position.x = 0
@@ -162,9 +169,9 @@ scene.add(pointLight)
 
 const pointLightHelper = new THREE.PointLightHelper(pointLight,.1)
 scene.add(pointLightHelper)
-gui.add(pointLight.position, 'x').min(-6).max(6).step(0.01)
+gui.add(pointLight.position, 'x').min(-30).max(30).step(0.01)
 gui.add(pointLight.position, 'y').min(0).max(30).step(0.01)
-gui.add(pointLight.position, 'z').min(-3).max(3).step(0.01)
+gui.add(pointLight.position, 'z').min(-30).max(30).step(0.01)
 gui.add(pointLight, 'intensity').min(0).max(10).step(0.1)
 
 /**
@@ -204,7 +211,7 @@ scene.add(camera)
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
-// const controls = new FlyControls(camera, canvas)
+
 /**
  * Renderer
  */
@@ -223,21 +230,17 @@ renderer.shadowMap.enabled = true;
  */
 
 const clock = new THREE.Clock()
+
 let movespeed = 0.01
 let movespeed2 = -0.01
+
 const tick = () =>
 {
 
-    const elapsedTime = clock.getElapsedTime()
-
     // Update objects
-    //sphere.position.set(0, 3, 0)
-
-    // Update Orbital Controls
-    controls.update()
-
-    // Render
-    renderer.render(scene, camera)
+    if(star){
+        star.rotateY(0.0174533)
+    }
     if(cloud){
         if(cloud.position.x >= 6)
         {
@@ -262,6 +265,12 @@ const tick = () =>
         cloud2.position.x += movespeed2
 
     }
+    // Update Orbital Controls
+    controls.update()
+
+    // Render
+    renderer.render(scene, camera)
+
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
